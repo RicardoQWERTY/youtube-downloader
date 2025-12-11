@@ -1,8 +1,50 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import type { VideoInfo, VideoFormat } from "@/types/video";
+import { sanitizeFilename } from "@/lib/utils";
 
-const execAsync = promisify(exec);
+const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+function spawnAsync(
+  command: string,
+  args: string[],
+  options?: { timeout?: number }
+): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args);
+    const stdout: Buffer[] = [];
+    const stderr: Buffer[] = [];
+
+    const timeout = options?.timeout ?? TIMEOUT_MS;
+    const timer = setTimeout(() => {
+      child.kill("SIGTERM");
+      reject(new Error(`Process timed out after ${timeout / 1000} seconds`));
+    }, timeout);
+
+    child.stdout.on("data", (chunk) => stdout.push(chunk));
+    child.stderr.on("data", (chunk) => stderr.push(chunk));
+
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve({
+          stdout: Buffer.concat(stdout).toString(),
+          stderr: Buffer.concat(stderr).toString(),
+        });
+      } else {
+        reject(
+          new Error(
+            `Process exited with code ${code}: ${Buffer.concat(stderr).toString()}`
+          )
+        );
+      }
+    });
+  });
+}
 
 interface YtDlpFormat {
   format_id: string;
@@ -101,10 +143,11 @@ function parseFormats(formats: YtDlpFormat[]): {
 }
 
 export async function getVideoInfo(url: string): Promise<VideoInfo> {
-  const { stdout } = await execAsync(
-    `yt-dlp --dump-json --no-warnings "${url}"`,
-    { maxBuffer: 10 * 1024 * 1024 }
-  );
+  const { stdout } = await spawnAsync("yt-dlp", [
+    "--dump-json",
+    "--no-warnings",
+    url,
+  ]);
 
   const data: YtDlpOutput = JSON.parse(stdout);
   const { videoFormats, audioFormats } = parseFormats(data.formats);
@@ -127,37 +170,32 @@ export async function downloadVideo(
   formatId: string,
   isAudioOnly: boolean
 ): Promise<{ data: Buffer; filename: string }> {
-  const { spawn } = await import("child_process");
-
   // Get video info first for the title
-  const { stdout: infoJson } = await execAsync(
-    `yt-dlp --dump-json --no-warnings "${url}"`,
-    { maxBuffer: 10 * 1024 * 1024 }
-  );
+  const { stdout: infoJson } = await spawnAsync("yt-dlp", [
+    "--dump-json",
+    "--no-warnings",
+    url,
+  ]);
 
   const info = JSON.parse(infoJson);
   const ext = isAudioOnly ? "m4a" : "mp4";
-  const safeTitle = info.title.replace(/[<>:"/\\|?*]/g, "_");
+  const safeTitle = sanitizeFilename(info.title);
   const filename = `${safeTitle}.${ext}`;
 
   // Download using yt-dlp and pipe to stdout
-  const formatArg = isAudioOnly ? `-f ${formatId}` : `-f ${formatId}+bestaudio`;
+  const args = isAudioOnly
+    ? ["-f", formatId, "-o", "-", url]
+    : ["-f", `${formatId}+bestaudio`, "--merge-output-format", "mp4", "-o", "-", url];
 
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-
-    const args = [
-      ...formatArg.split(" "),
-      "-o", "-",
-      url,
-    ];
-
-    // Only add merge-output-format for video (not audio)
-    if (!isAudioOnly) {
-      args.splice(2, 0, "--merge-output-format", "mp4");
-    }
-
     const ytdlp = spawn("yt-dlp", args);
+
+    // 5 minute timeout for downloads
+    const timer = setTimeout(() => {
+      ytdlp.kill("SIGTERM");
+      reject(new Error("Download timed out after 5 minutes"));
+    }, TIMEOUT_MS);
 
     ytdlp.stdout.on("data", (chunk: Buffer) => {
       chunks.push(chunk);
@@ -168,10 +206,12 @@ export async function downloadVideo(
     });
 
     ytdlp.on("error", (error) => {
+      clearTimeout(timer);
       reject(error);
     });
 
     ytdlp.on("close", (code) => {
+      clearTimeout(timer);
       if (code === 0) {
         resolve({
           data: Buffer.concat(chunks),

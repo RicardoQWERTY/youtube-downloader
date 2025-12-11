@@ -1,0 +1,27 @@
+# Development Dockerfile
+FROM oven/bun:1-debian
+
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ffmpeg \
+    python3 \
+    python3-venv \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install yt-dlp
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir yt-dlp
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy package files and install dependencies
+COPY package.json bun.lock* ./
+RUN bun install
+
+# Source code will be mounted via volume
+EXPOSE 3000
+
+CMD ["bun", "run", "dev"]

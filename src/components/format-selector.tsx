@@ -41,12 +41,13 @@ export function FormatSelector({
   return (
     <FieldGroup className="flex-row items-end gap-4">
       <Field className="w-auto">
-        <FieldLabel>Format</FieldLabel>
+        <FieldLabel id="format-label">Format</FieldLabel>
         <Select
           value={formatType}
           onValueChange={(value) => onFormatTypeChange(value as FormatType)}
+          aria-labelledby="format-label"
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-32" aria-label="Select file format">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -57,7 +58,9 @@ export function FormatSelector({
       </Field>
 
       <Field className="flex-1">
-        <FieldLabel>{formatType === "mp4" ? "Quality" : "Bitrate"}</FieldLabel>
+        <FieldLabel id="quality-label">
+          {formatType === "mp4" ? "Quality" : "Bitrate"}
+        </FieldLabel>
         <Select
           value={selectedFormat?.formatId || ""}
           onValueChange={(formatId) => {
@@ -66,8 +69,11 @@ export function FormatSelector({
               onFormatChange(format);
             }
           }}
+          aria-labelledby="quality-label"
         >
-          <SelectTrigger>
+          <SelectTrigger
+            aria-label={`Select ${formatType === "mp4" ? "video quality" : "audio bitrate"}`}
+          >
             <SelectValue
               placeholder={`Select ${formatType === "mp4" ? "quality" : "bitrate"}`}
             />

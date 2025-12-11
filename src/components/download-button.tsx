@@ -7,12 +7,14 @@ import type { DownloadProgress } from "@/types/video";
 interface DownloadButtonProps {
   progress: DownloadProgress;
   onDownload: () => void;
+  onCancel?: () => void;
   disabled: boolean;
 }
 
 export function DownloadButton({
   progress,
   onDownload,
+  onCancel,
   disabled,
 }: DownloadButtonProps) {
   const isProcessing =
@@ -37,14 +39,26 @@ export function DownloadButton({
         <p className="text-sm text-green-600 text-center">{progress.message}</p>
       )}
 
-      <Button
-        onClick={onDownload}
-        disabled={disabled || isProcessing}
-        className="w-full"
-        size="lg"
-      >
-        {isProcessing ? "Processing..." : "Download"}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={onDownload}
+          disabled={disabled || isProcessing}
+          className="flex-1"
+          size="lg"
+        >
+          {isProcessing ? "Processing..." : "Download"}
+        </Button>
+        {isProcessing && onCancel && (
+          <Button
+            onClick={onCancel}
+            variant="outline"
+            size="lg"
+            aria-label="Cancel download"
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

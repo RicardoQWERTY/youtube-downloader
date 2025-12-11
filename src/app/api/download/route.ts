@@ -29,8 +29,37 @@ export async function GET(request: NextRequest) {
     return new NextResponse(new Uint8Array(data), { headers });
   } catch (error) {
     console.error("Error downloading video:", error);
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    // Categorize errors for better user feedback
+    if (errorMessage.includes("timed out")) {
+      return NextResponse.json(
+        { error: "Download timed out. The video may be too large." },
+        { status: 504 }
+      );
+    }
+    if (errorMessage.includes("format") || errorMessage.includes("Format")) {
+      return NextResponse.json(
+        { error: "The selected format is not available for this video." },
+        { status: 400 }
+      );
+    }
+    if (errorMessage.includes("Video unavailable") || errorMessage.includes("Private video")) {
+      return NextResponse.json(
+        { error: "This video is unavailable or private." },
+        { status: 404 }
+      );
+    }
+    if (errorMessage.includes("geo") || errorMessage.includes("country")) {
+      return NextResponse.json(
+        { error: "This video is not available in your region." },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to download video" },
+      { error: "Failed to download video. Please try again or select a different format." },
       { status: 500 }
     );
   }

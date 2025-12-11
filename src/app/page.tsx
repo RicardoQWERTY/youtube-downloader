@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { VideoInfo } from "@/components/video-info";
 import { FormatSelector } from "@/components/format-selector";
 import { DownloadButton } from "@/components/download-button";
 import { convertToMp3, downloadBlob } from "@/lib/ffmpeg";
+import { sanitizeFilename } from "@/lib/utils";
 import type {
   VideoInfo as VideoInfoType,
   VideoFormat,
@@ -30,6 +31,7 @@ export default function Home() {
     progress: 0,
     message: "",
   });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Reset selected format when format type changes
   useEffect(() => {
@@ -70,6 +72,10 @@ export default function Home() {
   const handleDownload = async () => {
     if (!videoInfo || !selectedFormat || !currentUrl) return;
 
+    // Create new AbortController for this download
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setProgress({
       status: "downloading",
       progress: 0,
@@ -89,11 +95,11 @@ export default function Home() {
           currentUrl
         )}&formatId=${selectedFormat.formatId}&type=video`;
 
-        const response = await fetch(downloadUrl);
+        const response = await fetch(downloadUrl, { signal });
         if (!response.ok) throw new Error("Download failed");
 
         const blob = await response.blob();
-        const safeTitle = videoInfo.title.replace(/[<>:"/\\|?*]/g, "_");
+        const safeTitle = sanitizeFilename(videoInfo.title);
         downloadBlob(blob, `${safeTitle}.mp4`);
 
         setProgress({
@@ -113,7 +119,7 @@ export default function Home() {
           currentUrl
         )}&formatId=${selectedFormat.formatId}&type=audio`;
 
-        const response = await fetch(downloadUrl);
+        const response = await fetch(downloadUrl, { signal });
         if (!response.ok) throw new Error("Download failed");
 
         const audioBuffer = await response.arrayBuffer();
@@ -140,7 +146,7 @@ export default function Home() {
           }
         );
 
-        const safeTitle = videoInfo.title.replace(/[<>:"/\\|?*]/g, "_");
+        const safeTitle = sanitizeFilename(videoInfo.title);
         downloadBlob(mp3Blob, `${safeTitle}.mp3`);
 
         setProgress({
@@ -150,12 +156,31 @@ export default function Home() {
         });
       }
     } catch (err) {
+      // Don't show error if it was cancelled by user
+      if (err instanceof Error && err.name === "AbortError") {
+        setProgress({
+          status: "idle",
+          progress: 0,
+          message: "",
+        });
+        return;
+      }
+
       console.error("Download error:", err);
       setProgress({
         status: "error",
         progress: 0,
         message: err instanceof Error ? err.message : "Download failed",
       });
+    } finally {
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
   };
 
@@ -202,6 +227,7 @@ export default function Home() {
                 <DownloadButton
                   progress={progress}
                   onDownload={handleDownload}
+                  onCancel={handleCancel}
                   disabled={!selectedFormat}
                 />
               </>
